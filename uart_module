@@ -39,3 +39,18 @@ void UART_SendString(char *str)
 		j++;  //...till the end
 	}
 }
+
+int main(void)
+{
+	SetUpUART(9600);
+	UART_SendString("Type in character or string...then I will display it!\r\n");
+	char c;
+	
+	while (1)
+	{
+		
+		c=UART_RxChar();
+		UART_TxChar(c);		
+		
+	}
+}
