@@ -1,0 +1,41 @@
+#define F_CPU 8000000UL
+#define BAUD_PRESCALE (((F_CPU / (USART_BAUDRATE * 16UL))) - 1)
+
+#include <avr/io.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+//function to setup/initialize USART module
+void SetUpUART(long USART_BAUDRATE)
+{
+	UCSRB |= (1 << RXEN) | (1 << TXEN);
+	//UCSR0C |= (1 << URSEL) | (1 << UCSZ0) | (1 << UCSZ1); //8bit size: already a default on most AVR
+	UBRRL = BAUD_PRESCALE;  //lower byte of UBRR
+	UBRRH = (BAUD_PRESCALE >> 8); //upper byte of UBRR
+}
+
+//function to receive single char
+unsigned char UART_RxChar()
+{
+	while ((UCSRA & (1 << RXC)) == 0);  //as long as there's unread data on the Rx buffer
+	return(UDR);  //return the data
+}
+
+//function to transmit single char
+void UART_TxChar(char ch)
+{
+	while (! (UCSRA & (1<<UDRE))); //as long as Tx buffer is ready to accept data
+	UDR = ch ; //load the input char to Tx UDR
+}
+
+//function to receive string i.e. group of chars
+void UART_SendString(char *str)
+{
+	unsigned char j=0;
+	
+	while (str[j]!=0) //as long as char is not null
+	{
+		UART_TxChar(str[j]); //transmit char...
+		j++;  //...till the end
+	}
+}
